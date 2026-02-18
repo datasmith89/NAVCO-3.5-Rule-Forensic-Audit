@@ -8,7 +8,7 @@ All data used in this audit is sourced from the **Nonviolent and Violent Campaig
 
 * **NAVCO 1.1:** [EricaChenoweth.com](https://www.ericachenoweth.com/research) / [Harvard Dataverse (doi:10.7910/DVN/07IDW)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YLLHEE)
 * **NAVCO 1.2:** [Harvard Dataverse (doi:10.7910/DVN/0UZOTX)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/0UZOTX)
-* **NAVCO 1.3:** [Harvard Dataverse (doi:10.7910/DVN/MHOXDV)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MHOXDV)
+* **NAVCO 1.3:** [Harvard Dataverse (doi:10.7910/DVN/MHOXDV)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ON9XND)
 * **NAVCO 2.1:** [Harvard Dataverse (doi:10.7910/DVN/MHOXDV)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MHOXDV)
 
 ## Dataset Observations
