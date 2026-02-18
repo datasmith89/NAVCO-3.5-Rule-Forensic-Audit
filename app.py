@@ -1,138 +1,95 @@
 import pandas as pd
 import numpy as np
 import os
-import sys
 
-# --- CONFIGURATION ---
+
 FILES = {
-    "1.1": ["NAVCO 1.1.dta"],
-    "1.2": ["NAVCO 1.2 Updated.xlsx", "NAVCO 1.2 Updated.csv"],
-    "1.3": ["NAVCO 1.3 List.xlsx", "NAVCO 1.3 List.csv", "NAVCO 1.3 List.xlsx - Sheet1.csv"]
+    "1.1": "NAVCO 1.1.dta",
+    "1.2": "NAVCO 1.2 Updated.xlsx",
+    "1.3": "NAVCO 1.3 List.xlsx",
+    "2.1": "NAVCO2-1_ForPublication.xls"
 }
 
+def print_intro():
+    banner("NAVCO PROJECT FORENSIC AUDIT: DATASET-DRIVEN COMPARISON")
+    print("""
+This script performs a longitudinal audit of the '3.5% Rule' across four 
+generations of the NAVCO research project. 
+
+OBJECTIVES:
+1. Identify the 20th-century 'failure ceiling' used to establish the 3.5% rule.
+2. Cross-reference 21st-century failures (Bahrain) across different versions.
+3. Verify the presence of participation data in modern summary lists (v1.3).
+
+METHODOLOGY:
+The script relies exclusively on internal variables (peakmembership, lnpop, 
+CAMP_SIZE_CAT, and SUCCESS) to track how failure outcomes are recorded.
+    """)
+
 def banner(text):
-    print(f"\n{'='*70}\n{text.center(70)}\n{'='*70}")
+    print(f"\n{'='*80}\n{text.center(80)}\n{'='*80}")
 
-def load_file(version):
-    for fname in FILES[version]:
-        if os.path.exists(fname):
-            print(f"[{version}] Found: {fname}")
-            try:
-                if fname.endswith('.dta'): return pd.read_stata(fname)
-                if fname.endswith('.xlsx'): return pd.read_excel(fname)
-                if fname.endswith('.csv'): return pd.read_csv(fname)
-            except Exception as e:
-                print(f"Error: {e}")
-    return None
-
-def analyze_1_1(df):
-    """
-    NAVCO 1.1 (1900-2006)
-    Has precise participation numbers (peakmembership).
-    """
-    banner("NAVCO 1.1 (1900-2006)")
+def run_neutral_audit():
+    print_intro()
     
-    # Calculate Participation %
-    if 'peakmembership' in df.columns and 'lnpop' in df.columns:
+    # 1. NAVCO 1.1 Analysis
+    if os.path.exists(FILES["1.1"]):
+        report_section = "NAVCO 1.1 (Data Range: 1900-2006)"
+        banner(report_section)
+        df = pd.read_stata(FILES["1.1"])
+        # Calculating % from raw population and membership
         df['pop_cal'] = np.exp(df['lnpop']) * 1000
         df['part_pct'] = df['peakmembership'] / df['pop_cal']
         
-        # Find biggest NONVIOLENT FAILURE
-        fails = df[(df['nonviol'] == 1) & (df['success'] == 0)]
-        
-        if not fails.empty:
-            max_fail = fails.loc[fails['part_pct'].idxmax()]
-            print(f"Highest Failure: {max_fail['campaign']} ({max_fail['byear']})")
-            print(f"Participation:   {max_fail['part_pct']:.2%} (Limit: 3.5%)")
-            
-            if max_fail['part_pct'] < 0.035:
-                print("VERDICT:         RULE HOLDS (Max failure < 3.5%)")
-            else:
-                print("VERDICT:         RULE BROKEN")
-        else:
-            print("No nonviolent failures found.")
-    else:
-        print("Error: Missing 'peakmembership' or 'lnpop' columns.")
+        nv_fails = df[(df['nonviol'] == 1) & (df['success'] == 0)]
+        if not nv_fails.empty:
+            max_f = nv_fails.loc[nv_fails['part_pct'].idxmax()]
+            print(f"Finding: Highest failure participation recorded: {max_f['part_pct']:.4%}")
+            print(f"Campaign: {max_f['campaign']} ({max_f['byear']})")
 
-def analyze_1_2(df):
-    """
-    NAVCO 1.2 (1945-2013)
-    Has pre-calculated percentage column.
-    """
-    banner("NAVCO 1.2 (1945-2013)")
-    df.columns = [c.upper().strip() for c in df.columns]
-    
-    pct_col = 'PERCENTAGE POPULAR PARTICIPATION'
-    if pct_col in df.columns:
-        # Find biggest NONVIOLENT FAILURE
-        nv_col = 'NONVIOL' if 'NONVIOL' in df.columns else 'PRIM_METHOD'
-        fails = df[(df[nv_col] == 1) & (df['SUCCESS'] == 0)].copy()
+    # 2. NAVCO 1.2 Analysis
+    if os.path.exists(FILES["1.2"]):
+        banner("NAVCO 1.2 (Data Range: 1945-2013)")
+        df = pd.read_excel(FILES["1.2"])
+        df.columns = [str(c).strip().upper() for c in df.columns]
+        pct_col = 'PERCENTAGE POPULAR PARTICIPATION'
         
-        if not fails.empty:
-            top_fail = fails.sort_values(by=pct_col, ascending=False).iloc[0]
-            val = top_fail[pct_col]
-            threshold = 3.5 if val > 1.0 else 0.035
-            
-            print(f"Highest Failure: {top_fail.get('CAMPAIGN')} ({top_fail.get('BYEAR')})")
-            print(f"Participation:   {val:.2%} (Limit: {threshold:.1%})")
-            
-            if val > threshold:
-                print("VERDICT:         RULE BROKEN")
-            else:
-                print("VERDICT:         RULE HOLDS")
-        else:
-            print("No nonviolent failures found.")
-    else:
-        print(f"Error: Column '{pct_col}' not found.")
+        if pct_col in df.columns:
+            nv_fails = df[(df['NONVIOL'] == 1) & (df['SUCCESS'] == 0)]
+            if not nv_fails.empty:
+                max_f = nv_fails.sort_values(by=pct_col, ascending=False).iloc[0]
+                print(f"Finding: Highest failure participation recorded: {max_f[pct_col]:.4%}")
+                print(f"Campaign: {max_f.get('CAMPAIGN')} ({max_f.get('BYEAR')})")
 
-def analyze_1_3(df):
-    """
-    NAVCO 1.3 (1900-2019)
-    Forensic Check: Does it even HAVE the numbers?
-    """
-    banner("NAVCO 1.3 (1900-2019)")
-    df.columns = [c.upper().strip() for c in df.columns]
-    
-    # 1. Check for Participation Data
-    part_keywords = ['MEMBERSHIP', 'PARTICIPATION', 'SIZE', 'PCT', 'PERCENT']
-    found_cols = [c for c in df.columns if any(k in c for k in part_keywords)]
-    
-    if found_cols:
-        print(f"Data columns found: {found_cols}")
-        # If found, we would run the logic here.
-        # But based on your file, we expect NONE.
-    else:
-        print("CRITICAL FINDING: Participation data is MISSING in this dataset.")
-        print("Analysis: NAVCO 1.3 covers the Hong Kong/Modern era (2019),")
-        print("          but the 'participation' variable was removed from this specific file.")
+    # 3. NAVCO 2.1 Analysis (Citation: Chenoweth & Shay, 2019)
+    if os.path.exists(FILES["2.1"]):
+        banner("NAVCO 2.1 (Annual Data - Chenoweth & Shay, 2019)")
+        df = pd.read_excel(FILES["2.1"])
+        df.columns = [str(c).strip().upper() for c in df.columns]
         
-        # 2. Check for Hong Kong Outcome
-        # We can at least prove Hong Kong FAILED in this dataset.
-        hk = df[df['LOCATION'].str.contains('Hong Kong', case=False, na=False) | 
-                df['LOCATION'].str.contains('China', case=False, na=False)]
-        
-        hk_fails = hk[(hk['CAMPAIGN'].str.contains('Hong Kong', case=False, na=False)) & 
-                      (hk['SUCCESS'] == 0) & 
-                      (hk['NONVIOL'] == 1)]
-        
-        if not hk_fails.empty:
-            print("\nConfirmed Outcomes in 1.3:")
-            for _, row in hk_fails.iterrows():
-                print(f" -> {row['CAMPAIGN']} ({row['BYEAR']}): FAILED")
-            print("\nImplication: We have the failure (Success=0) but the '3.5%' math is impossible")
-            print("             to run because the participation column was dropped.")
-        else:
-            print("Hong Kong failure not explicitly found in text search.")
+        target_case = df[(df['LOCATION'].str.contains('Bahrain', na=False)) & (df['YEAR'] == 2011)]
+        if not target_case.empty:
+            row = target_case.iloc[0]
+            print(f"Case Study: {row.get('CAMP_NAME')} ({row.get('YEAR')})")
+            print(f"Recorded Size Category (CAMP_SIZE_CAT): {row.get('CAMP_SIZE_CAT')}")
+            print(f"Recorded Success (SUCCESS): {row.get('SUCCESS')}")
+            print("Note: Size Category 2 represents a range of 1,001 - 10,000 participants.")
 
-def main():
-    df1 = load_file("1.1")
-    if df1 is not None: analyze_1_1(df1)
-    
-    df2 = load_file("1.2")
-    if df2 is not None: analyze_1_2(df2)
-    
-    df3 = load_file("1.3")
-    if df3 is not None: analyze_1_3(df3)
+    # 4. NAVCO 1.3 Analysis
+    if os.path.exists(FILES["1.3"]):
+        banner("NAVCO 1.3 (Data Range: 1900-2019)")
+        df = pd.read_excel(FILES["1.3"])
+        df.columns = [str(c).strip().upper() for c in df.columns]
+        
+        part_keywords = ['PARTICIPATION', 'MEMBERSHIP', 'PERCENTAGE', 'PCT']
+        found_cols = [c for c in df.columns if any(k in c for k in part_keywords)]
+        
+        print(f"Participation variables found in v1.3 summary list: {found_cols if found_cols else 'None'}")
+        
+        hk_case = df[df['CAMPAIGN'].str.contains('Hong Kong', case=False, na=False)]
+        if not hk_case.empty:
+            for _, row in hk_case.iterrows():
+                print(f"Outcome Check: {row['CAMPAIGN']} ({row['BYEAR']}) | Success: {row['SUCCESS']}")
 
 if __name__ == "__main__":
-    main()
+    run_neutral_audit()
