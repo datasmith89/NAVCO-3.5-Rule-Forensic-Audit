@@ -1,8 +1,12 @@
 name: navco_audit
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python=3.9
   - pandas
   - numpy
-  - openpyxl  # Required if you switch to reading the .xlsx file directly
+  - xlrd >=2.0.1
+  - openpyxl
+  - pyreadstat  # Required for .dta (NAVCO 1.1)
+  - pip
