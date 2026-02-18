@@ -1,0 +1,8 @@
+name: navco_audit
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pandas
+  - numpy
+  - openpyxl  # Required if you switch to reading the .xlsx file directly
