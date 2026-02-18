@@ -1,46 +1,55 @@
 # NAVCO Forensic Audit: The Collapse of the 3.5% Rule
 
 ## Project Overview
-This repository contains a Python-based forensic audit of the **"3.5% Rule"**—the widely cited claim that no nonviolent campaign has failed after reaching a 3.5% participation threshold. This audit reverse-engineers the data to identify exactly when and how this "rule" became obsolete in the 21st century.
+This repository contains a Python-based forensic audit of the **"3.5% Rule"**—the widely cited claim that no nonviolent campaign has failed after reaching a 3.5% participation threshold. This audit reverse-engineers the data across four versions of the NAVCO project to identify exactly when and how this "rule" became obsolete in the 21st century.
 
 ## Data Sources & Links
 All data used in this audit is sourced from the **Nonviolent and Violent Campaigns and Outcomes (NAVCO) Data Project**.
 
-* **NAVCO 1.1:** [Download from EricaChenoweth.com](https://www.ericachenoweth.com/research) / [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/07IDW)
-* **NAVCO 1.2:** [Download from Ash Center, Harvard](https://ash.harvard.edu/programs/nonviolent-and-violent-campaigns-and-outcomes-data-project/)
-* **NAVCO 1.3:** [Harvard Dataverse (1900-2019 List)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MHOXDV)
+* **NAVCO 1.1:** [EricaChenoweth.com](https://www.ericachenoweth.com/research) / [Harvard Dataverse (doi:10.7910/DVN/07IDW)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/07IDW)
+* **NAVCO 1.2:** [Harvard Dataverse (doi:10.7910/DVN/0UZOTX)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/0UZOTX)
+* **NAVCO 1.3:** [Harvard Dataverse (doi:10.7910/DVN/MHOXDV)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MHOXDV)
+* **NAVCO 2.1:** [Harvard Dataverse (doi:10.7910/DVN/MHOXDV)](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MHOXDV)
 
-## The Timeline of Failure
+## Dataset Observations
 
-| Dataset | Scope | Max Failure Found | Forensic Status |
+| Version | Period | Participation Variable | Recorded Highest Failure |
 | :--- | :--- | :--- | :--- |
-| **NAVCO 1.1** | 1900–2006 | **3.45%** (First Intifada) | **VERIFIED** |
-| **NAVCO 1.2** | 1945–2013 | **6.38%** (Bahrain, 2011) | **BROKEN** |
-| **NAVCO 1.3** | 1900–2019 | **~26.0%** (Hong Kong, 2019) | **SHATTERED** |
+| **NAVCO 1.1** | 1900–2006 | Calculated (Membership/Pop) | **3.4530%** (1987 Intifada) |
+| **NAVCO 1.2** | 1945–2013 | Pre-calculated Column | **6.3816%** (Bahrain, 2011) |
+| **NAVCO 2.1** | 1945–2014 | Categorical (1-5 Scale) | **Size Category 2** (Bahrain, 2011) |
+| **NAVCO 1.3** | 1900–2019 | None Provided in List | **Success: 0** (Hong Kong, 2014) |
 
-## ⚠️ Critical Forensic Finding: The 1.3 Data Gap
-While `NAVCO 1.3 List.xlsx` is the official outcome ledger through 2019, it represents a "forensic dead-end" for the 3.5% Rule. 
-* **1.1 & 1.2:** Include the raw numbers (Membership/Population) needed to calculate the threshold.
-* **1.3:** The researchers **omitted the participation columns** in this specific summary list. 
-* **Finding:** The 1.3 file confirms massive modern movements like **Hong Kong (2019)** were failures (`SUCCESS=0`), but hides the participation data that proves the 3.5% Rule is no longer valid.
 
-## ⚖️ Political Implication: U.S. Domestic Application
+
+## ⚠️ Critical Forensic Findings
+
+### The 1.3 Data Gap
+While `NAVCO 1.3 List.xlsx` is the official outcome ledger through 2019, it represents a "forensic dead-end" for the participation-based theory.
+* **Finding:** The 1.3 file confirms massive modern movements like **Hong Kong (2014)** were failures (`SUCCESS=0`), but the participation variables used to calculate the 3.5% rule in versions 1.1 and 1.2 were omitted from this specific summary list.
+
+### The 2.1 Coding Shift
+In the annual disaggregated data (**NAVCO 2.1**), the audit identifies a shift in how high-participation failures are classified.
+* **Finding:** The Bahrain 2011 campaign, recorded at **6.3816%** in v1.2, is recorded in v2.1 (Chenoweth & Shay, 2019) as **Size Category 2** (representing 1,001 - 10,000 participants). 
+
+## ⚖️ Domain Application & Methodology Warning
 
 **The NAVCO dataset identifies success ONLY within the goals of a "Maximalist Campaign."**
 
-As defined in the official NAVCO Codebook (p. 2), a maximalist campaign is strictly limited to:
+As defined in the official **NAVCO Codebook (p. 2)**, a maximalist campaign is strictly limited to:
 1.  **Regime Change** (Overthrowing the existing government/constitution)
 2.  **Anti-Occupation** (Expelling a foreign military)
 3.  **Secession** (Breaking away to form a new state)
 
+
+
 ### The Warning
-When public figures (such as Maria J. Stephan) promote the "3.5% Rule" in the United States, they are citing a manual for **regime change**. Because the dataset excludes all non-maximalist movements (policy reform/protest), using this rule in the U.S. carries a strong insinuation of **overthrowing the government**. As this audit shows, "all states defend themselves," and 21st-century state capacity has rendered the 3.5% threshold obsolete.
+When public figures promote the "3.5% Rule" in the United States, they are citing a manual for **regime change**. Because the dataset excludes all non-maximalist movements (policy reform/protest), using this rule in the U.S. carries a factual implication of **overthrowing the government**. As this audit demonstrates, 21st-century state capacity has evolved to successfully defend against maximalist pressure, rendering the 20th-century "3.5% guarantee" obsolete.
 
 ## Citations
-If using this data, please credit the original authors:
-* **Chenoweth, Erica, and Maria J. Stephan.** 2011. *Why Civil Resistance Works: The Strategic Logic of Nonviolent Conflict*. New York: Columbia University Press.
-* **Chenoweth, Erica, and Christopher Wiley Shay.** 2020. *NAVCO 1.3 Dataset*. Harvard Dataverse.
+* **NAVCO 1.1 - 1.3:** Chenoweth, Erica, and Maria J. Stephan. 2011. *Why Civil Resistance Works: The Strategic Logic of Nonviolent Conflict*. New York: Columbia University Press.
+* **NAVCO 2.1:** Chenoweth, Erica, and Christopher Wiley Shay. 2019. *NAVCO 2.1 Dataset*. Harvard Dataverse.
 
 ## Usage
-1. Place `NAVCO 1.1.dta`, `NAVCO 1.2 Updated.xlsx`, and `NAVCO 1.3 List.xlsx` in the root folder.
+1. Place `NAVCO 1.1.dta`, `NAVCO 1.2 Updated.xlsx`, `NAVCO 1.3 List.xlsx`, and `NAVCO2-1_ForPublication.xls` in the root folder.
 2. Run `python app.py`.
